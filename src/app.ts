@@ -12,13 +12,21 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/courts', courtRoutes);
 app.use('/api/bookings', bookingRoutes);
+
+// Basic route for testing
+app.get('/', (req, res) => {
+  res.send('Court Booking API is running');
+});
 
 // Error handling
 app.use(errorHandler);
