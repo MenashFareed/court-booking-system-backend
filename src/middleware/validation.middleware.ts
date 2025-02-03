@@ -17,9 +17,7 @@ export const validateLogin = [
 ];
 
 export const validateBooking = [
-  body('courtId').notEmpty(),
-  body('startTime').isISO8601(),
-  body('endTime').isISO8601(),
+  body('slotId').notEmpty(),
   handleValidationErrors
 ];
 

@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { Court } from '../models/Court.model';
 import { User } from '../models/User.model';
+import { TimeSlot } from '../models/TimeSlot.model';
+import { TimeSlot as TS } from '../models/TimeSlot';
 
 dotenv.config();
 
@@ -63,6 +65,13 @@ const users = [
   },
 ];
 
+function addHours(date: Date, hours: number) {
+  const hoursToAdd = hours * 60 * 60 * 1000;
+  const dateObj = new Date(date);
+  dateObj.setTime(date.getTime() + hoursToAdd);
+  return dateObj;
+}
+
 async function seedDatabase() {
   try {
     // Connect to MongoDB
@@ -72,6 +81,7 @@ async function seedDatabase() {
     // Clear existing data
     await Court.deleteMany({});
     await User.deleteMany({});
+    await TimeSlot.deleteMany({});
     console.log('Cleared existing data');
 
     // Insert courts
@@ -81,6 +91,29 @@ async function seedDatabase() {
     // Insert users
     await User.insertMany(users);
     console.log('Users seeded successfully');
+
+    const courtList = await Court.find({});
+    let slots: TS[] = [];
+
+    courtList.map((court) => {
+      const currentTime = new Date();
+      slots.push({
+        courtId: court.id,
+        startTime: currentTime,
+        endTime: addHours(currentTime, 1),
+        isAvailable: true
+      });
+      slots.push({
+        courtId: court.id,
+        startTime: addHours(currentTime, 1),
+        endTime: addHours(currentTime, 2),
+        isAvailable: true
+      });
+    });
+    
+    // Insert Slots
+    await TimeSlot.insertMany(slots);
+    console.log('Slots seeded successfully');
 
     console.log('Database seeded successfully');
     process.exit(0);
