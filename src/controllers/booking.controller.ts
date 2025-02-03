@@ -33,10 +33,18 @@ export const createBooking = async (req: Request, res: Response) => {
       status: 'pending'
     });
 
+    const updatedTimeSlot = await TimeSlot.findByIdAndUpdate(
+      slotId,
+      { isAvailable: false },
+      { new: true }
+    );
+
+    if (!updatedTimeSlot)
+      return res.status(404).json({ message: 'Time slot not found.' });
+
     await booking.save();
     res.status(201).json(booking);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: 'Error creating booking' });
   }
 };
