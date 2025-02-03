@@ -11,7 +11,7 @@ import { validateBooking } from '../middleware/validation.middleware';
 const router = express.Router();
 
 router.post('/', [auth, validateBooking], createBooking);
-router.get('/user', auth, getUserBookings);
+router.get('/userBookings', auth, getUserBookings);
 router.patch('/:id/status', [auth, adminAuth], updateBookingStatus);
 router.get('/slots', auth, getSlots);
 

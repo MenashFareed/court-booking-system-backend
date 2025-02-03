@@ -9,7 +9,7 @@ dotenv.config();
 
 const courts = [
   {
-    name: 'Center Court 1',
+    name: 'Tennis Court 1',
     type: 'tennis',
     location: 'Main Building',
     hourlyRate: 50,
@@ -18,7 +18,7 @@ const courts = [
     status: 'available',
   },
   {
-    name: 'Center Court 2',
+    name: 'Tennis Court 2',
     type: 'tennis',
     location: 'Main Building',
     hourlyRate: 45,
@@ -72,6 +72,32 @@ function addHours(date: Date, hours: number) {
   return dateObj;
 }
 
+function createTimeSlots(court: any) {
+  const slots: TS[] = [];
+  const currentDate = new Date();
+  currentDate.setHours(7, 0, 0, 0); // Set to 7 AM
+
+  // Create slots for 3 days
+  for (let day = 0; day < 3; day++) {
+    const dayDate = new Date(currentDate);
+    dayDate.setDate(currentDate.getDate() + day);
+
+    // Create slots from 7 AM to 8 PM (13 hours)
+    for (let hour = 0; hour < 13; hour++) {
+      const startTime = new Date(dayDate);
+      startTime.setHours(startTime.getHours() + hour);
+      
+      slots.push({
+        courtId: court.id,
+        startTime: startTime,
+        endTime: addHours(startTime, 1),
+        isAvailable: true
+      });
+    }
+  }
+  return slots;
+}
+
 async function seedDatabase() {
   try {
     // Connect to MongoDB
@@ -95,20 +121,9 @@ async function seedDatabase() {
     const courtList = await Court.find({});
     let slots: TS[] = [];
 
-    courtList.map((court) => {
-      const currentTime = new Date();
-      slots.push({
-        courtId: court.id,
-        startTime: currentTime,
-        endTime: addHours(currentTime, 1),
-        isAvailable: true
-      });
-      slots.push({
-        courtId: court.id,
-        startTime: addHours(currentTime, 1),
-        endTime: addHours(currentTime, 2),
-        isAvailable: true
-      });
+    // Generate slots for each court
+    courtList.forEach((court) => {
+      slots = [...slots, ...createTimeSlots(court)];
     });
     
     // Insert Slots
